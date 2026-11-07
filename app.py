@@ -1,4 +1,4 @@
-import streamlit as st
+ import streamlit as st
 import os
 import re
 
@@ -295,7 +295,7 @@ if search_clicked or user_query:
                         st.write(content[:350] + "...")
                     
                     # Extract URL
-                    \'st.link\_button("Verified Source", urls\[O ])
+                    st.link.button("Verified Source", urls\[O ])
                     if urls:
                         st.markdown(f"🔗 **Verified Source:** [{urls[0]}]({urls[0]})")
                     

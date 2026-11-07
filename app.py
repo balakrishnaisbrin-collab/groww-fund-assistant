@@ -43,8 +43,8 @@ def apply_custom_styles():
         }
         /* Highlight matched text */
         .highlight {
-            background-color: #D4EDDA;
-            color: #155724;
+            background-color: #28a745;
+            color: #white;
             font-weight: bold;
             padding: 2px 6px;
             border-radius: 4px;

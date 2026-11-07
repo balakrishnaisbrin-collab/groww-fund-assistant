@@ -1,4 +1,4 @@
- import streamlit as st
+import streamlit as st
 import os
 import re
 
@@ -185,22 +185,12 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# Sidebar for Knowledge Base Overview
-with st.sidebar:
-    st.header("📊 Knowledge Base")
-    st.info("Loaded with verified scheme documents.")
-    
-    txt_files = [f for f in os.listdir('.') if f.endswith('.txt')]
-    for idx, file in enumerate(txt_files, 1):
-        clean_name = file.replace('.txt', '').replace('_', ' ')
-        st.write(f"{idx}. {clean_name}")
-        
-    st.divider()
-    st.warning("⚠️ **Disclaimer:** Facts-only. No investment advice. Verify all data before investing.")
-
 # Load Data Safely
 def load_files():
     data = {}
+    if not os.path.exists('.'):
+        return data
+    txt_files = [f for f in os.listdir('.') if f.endswith('.txt')]
     for file in txt_files:
         try:
             with open(file, 'r', encoding='utf-8') as f:
@@ -210,6 +200,22 @@ def load_files():
     return data
 
 files_data = load_files()
+txt_files = list(files_data.keys())
+
+# Sidebar for Knowledge Base Overview
+with st.sidebar:
+    st.header("📊 Knowledge Base")
+    st.info("Loaded with verified scheme documents.")
+    
+    if txt_files:
+        for idx, file in enumerate(txt_files, 1):
+            clean_name = file.replace('.txt', '').replace('_', ' ')
+            st.write(f"{idx}. {clean_name}")
+    else:
+        st.write("No `.txt` files found in directory.")
+        
+    st.divider()
+    st.warning("⚠️ **Disclaimer:** Facts-only. No investment advice. Verify all data before investing.")
 
 # Top Metrics Row
 col_m1, col_m2, col_m3 = st.columns([1, 1, 2])
@@ -238,7 +244,7 @@ examples = [
 
 for i, (btn_text, query_val) in enumerate(examples):
     with example_cols[i]:
-        if st.button(btn_text, use_container_width=True):
+        if st.button(btn_text, use_container_width=True, key=f"ex_btn_{i}"):
             st.session_state.search_query = query_val
             st.rerun()
 
@@ -252,9 +258,9 @@ user_query = st.text_input(
 
 col_action1, col_action2 = st.columns([1, 6])
 with col_action1:
-    search_clicked = st.button("Ask Assistant", type="primary", use_container_width=True)
+    search_clicked = st.button("Ask Assistant", type="primary", use_container_width=True, key="ask_btn")
 with col_action2:
-    if st.button("Clear Console", use_container_width=True):
+    if st.button("Clear Console", use_container_width=True, key="clear_btn"):
         st.session_state.search_query = ""
         st.rerun()
 
@@ -294,14 +300,13 @@ if search_clicked or user_query:
                     else:
                         st.write(content[:350] + "...")
                     
-                # Extract URL
-                urls = re.findall(r'https?://\S+', content)
-                if urls:
-                    st.link_button("Verified Source", urls[0])
-                    st.markdown(f"🔗 **Verified Source:** [{urls[0]}]({urls[0]})")
-
-                with st.expander("View Full Raw Document"):
-                    st.text(content)
-
-    if matches_found == 0:
-        st.error("No direct matches found. Try searching for broader terms like 'expense', 'exit load', or 'lock-in'.")
+                    # Extract URL
+                    urls = re.findall(r'(https?://\S+)', content)
+                    if urls:
+                        st.markdown(f"🔗 **Verified Source:** [{urls[0]}]({urls[0]})")
+                    
+                    with st.expander("View Full Raw Document"):
+                        st.text(content)
+        
+        if matches_found == 0:
+            st.error("No direct matches found. Try searching for broader terms like 'expense', 'exit load', or 'lock-in'.")

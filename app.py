@@ -295,16 +295,13 @@ if search_clicked or user_query:
                         st.write(content[:350] + "...")
                     
                 # Extract URL
-                   
-urls = re.findall(r'https?://\S+', content)
+                urls = re.findall(r'https?://\S+', content)
+                if urls:
+                    st.link_button("Verified Source", urls[0])
+                    st.markdown(f"🔗 **Verified Source:** [{urls[0]}]({urls[0]})")
 
-if urls:
-    st.link_button("Verified Source", urls[0])
-                    if urls:
-                        st.markdown(f"🔗 **Verified Source:** [{urls[0]}]({urls[0]})")
-                    
-                    with st.expander("View Full Raw Document"):
-                        st.text(content)
-        
-        if matches_found == 0:
-            st.error("No direct matches found. Try searching for broader terms like 'expense', 'exit load', or 'lock-in'.")
+                with st.expander("View Full Raw Document"):
+                    st.text(content)
+
+    if matches_found == 0:
+        st.error("No direct matches found. Try searching for broader terms like 'expense', 'exit load', or 'lock-in'.")

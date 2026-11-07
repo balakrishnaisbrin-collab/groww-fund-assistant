@@ -2,311 +2,322 @@ import streamlit as st
 import os
 import re
 
-# Page Configuration - Must be the very first Streamlit command
-st.set_page_config(page_title="Groww SBI MF Pro Assistant", layout="wide")
+# 1. Page Configuration (Must be first)
+st.set_page_config(page_title="Groww Mutual Fund FAQ", layout="wide")
 
-# Custom CSS for Premium Glassmorphism & Neon Glow UI
-def apply_custom_styles():
-    st.markdown("""
-        <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-        /* 1. Main Background with Top Radial Spotlight */
-        .stApp {
-            background-color: #070913;
-            background-image: 
-                radial-gradient(at 50% 0%, rgba(99, 102, 241, 0.18) 0px, transparent 55%),
-                radial-gradient(at 85% 15%, rgba(6, 182, 212, 0.12) 0px, transparent 45%);
-            color: #F8FAFC;
-            font-family: 'Inter', sans-serif;
-        }
-
-        /* 2. Glassmorphic Hero Banner with Inner Lighting */
-        .header-banner {
-            background: linear-gradient(135deg, rgba(30, 27, 75, 0.75) 0%, rgba(15, 23, 42, 0.85) 50%, rgba(8, 51, 68, 0.7) 100%);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(99, 102, 241, 0.35);
-            padding: 28px 34px;
-            border-radius: 20px;
-            margin-bottom: 24px;
-            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7), 
-                        0 0 35px rgba(99, 102, 241, 0.15) inset;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 16px;
-        }
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 18px;
-        }
-        .logo-box {
-            width: 54px;
-            height: 54px;
-            border-radius: 14px;
-            background: linear-gradient(135deg, #6366F1, #06B6D4);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 24px;
-            color: white;
-            box-shadow: 0 0 20px rgba(6, 182, 212, 0.5);
-        }
-        .header-banner h1 {
-            color: #FFFFFF !important;
-            font-size: 2.1rem !important;
-            font-weight: 700 !important;
-            margin: 0 !important;
-            letter-spacing: -0.5px;
-        }
-        .header-banner p {
-            color: #94A3B8 !important;
-            font-size: 0.95rem !important;
-            margin: 4px 0 0 0 !important;
-        }
-        .status-pill {
-            background: rgba(6, 182, 212, 0.12);
-            border: 1px solid rgba(6, 182, 212, 0.45);
-            color: #22D3EE;
-            padding: 8px 16px;
-            border-radius: 999px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            box-shadow: 0 0 15px rgba(6, 182, 212, 0.2);
-            white-space: nowrap;
-        }
-
-        /* 3. Frosted Glass Metric Cards */
-        div[data-testid="stMetric"] {
-            background: rgba(30, 41, 59, 0.45);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 16px 22px;
-            border-radius: 16px;
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-        }
-        div[data-testid="stMetric"]:hover {
-            border-color: rgba(99, 102, 241, 0.45);
-            box-shadow: 0 0 20px rgba(99, 102, 241, 0.15);
-        }
-        div[data-testid="stMetricLabel"] p {
-            color: #94A3B8 !important;
-            font-weight: 600 !important;
-            letter-spacing: 0.5px;
-        }
-        div[data-testid="stMetricValue"] {
-            font-size: 32px !important;
-            font-weight: 700 !important;
-            color: #38BDF8 !important;
-        }
-
-        /* 4. Pill-Shaped Example Buttons with Hover Lighting */
-        div.stButton > button {
-            background: rgba(15, 23, 42, 0.75) !important;
-            color: #E2E8F0 !important;
-            border: 1px solid rgba(99, 102, 241, 0.4) !important;
-            border-radius: 999px !important;
-            padding: 10px 20px !important;
-            font-size: 0.88rem !important;
-            font-weight: 500 !important;
-            transition: all 0.25s ease-in-out !important;
-            box-shadow: 0 0 12px rgba(99, 102, 241, 0.1) inset !important;
-        }
-        div.stButton > button:hover {
-            border-color: #22D3EE !important;
-            color: #FFFFFF !important;
-            background: rgba(99, 102, 241, 0.2) !important;
-            box-shadow: 0 0 20px rgba(6, 182, 212, 0.45), 
-                        0 0 12px rgba(99, 102, 241, 0.3) inset !important;
-            transform: translateY(-2px);
-        }
-
-        /* Primary 'Ask Assistant' Button */
-        div.stButton > button[kind="primary"] {
-            background: linear-gradient(135deg, #6366F1 0%, #06B6D4 100%) !important;
-            color: #FFFFFF !important;
-            border: none !important;
-            font-weight: 600 !important;
-            box-shadow: 0 4px 20px rgba(6, 182, 212, 0.4) !important;
-        }
-
-        /* 5. Glowing Input Box on Click/Focus */
-        div[data-baseweb="input"] {
-            background-color: rgba(15, 23, 42, 0.85) !important;
-            border: 1px solid rgba(255, 255, 255, 0.14) !important;
-            border-radius: 14px !important;
-            transition: all 0.25s ease !important;
-        }
-        div[data-baseweb="input"]:focus-within {
-            border-color: #22D3EE !important;
-            box-shadow: 0 0 22px rgba(6, 182, 212, 0.35) !important;
-        }
-
-        /* 6. Result Container & Highlight Tags */
-        div[data-testid="stVerticalBlockBorderWrapper"] {
-            background: rgba(30, 41, 59, 0.45) !important;
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
-            border-radius: 16px !important;
-            padding: 18px !important;
-        }
-        .highlight {
-            background: rgba(6, 182, 212, 0.2);
-            color: #67E8F9;
-            border: 1px solid rgba(6, 182, 212, 0.45);
-            font-weight: 600;
-            padding: 2px 8px;
-            border-radius: 6px;
-        }
-
-        /* Sidebar Styling */
-        section[data-testid="stSidebar"] {
-            background-color: #0B0F19;
-            border-right: 1px solid rgba(255, 255, 255, 0.06);
-        }
-        </style>
-    """, unsafe_allow_html=True)
-
-apply_custom_styles()
-
-# Upgraded Premium Header Banner
+# 2. Custom CSS matching the exact Groww Dark Emerald UI
 st.markdown("""
-    <div class="header-banner">
-        <div class="header-left">
-            <div class="logo-box">S</div>
-            <div>
-                <h1>Groww SBI MF Pro Assistant</h1>
-                <p>Ask factual questions about SBI schemes. Every answer cites verified official data.</p>
-            </div>
-        </div>
-        <div class="status-pill">● Facts-only. No investment advice.</div>
-    </div>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    .stApp {
+        background: radial-gradient(circle at 50% 0%, #0d281e 0%, #06110d 65%);
+        color: #F8FAFC;
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* Hide default Streamlit top bar */
+    header {visibility: hidden;}
+
+    /* Top Header Card */
+    .hero-card {
+        background: rgba(14, 34, 26, 0.75);
+        border: 1px solid rgba(16, 185, 129, 0.25);
+        border-radius: 16px;
+        padding: 24px 28px;
+        margin-bottom: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .hero-left {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+    .g-logo {
+        width: 46px;
+        height: 46px;
+        background: #00d09c;
+        color: #06110d;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 24px;
+    }
+    .hero-title {
+        font-size: 26px;
+        font-weight: 700;
+        margin: 0;
+        color: #ffffff;
+    }
+    .hero-sub {
+        font-size: 14px;
+        color: #94a3b8;
+        margin: 4px 0 0 0;
+    }
+    .facts-badge {
+        background: rgba(16, 185, 129, 0.12);
+        border: 1px solid rgba(16, 185, 129, 0.35);
+        color: #34d399;
+        padding: 6px 14px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    /* Metric Box */
+    .scheme-box {
+        background: rgba(14, 34, 26, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 14px 20px;
+        width: 200px;
+        margin-bottom: 14px;
+    }
+    .scheme-num {
+        font-size: 22px;
+        font-weight: 700;
+        color: #ffffff;
+    }
+    .scheme-label {
+        font-size: 11px;
+        color: #94a3b8;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+    }
+
+    /* Disclaimer text */
+    .disclaimer {
+        font-size: 12.5px;
+        color: #94a3b8;
+        margin-bottom: 20px;
+    }
+
+    /* Example Buttons & Ask Button */
+    div.stButton > button {
+        background: rgba(16, 185, 129, 0.1) !important;
+        border: 1px solid rgba(16, 185, 129, 0.35) !important;
+        color: #e2e8f0 !important;
+        border-radius: 999px !important;
+        padding: 8px 18px !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        transition: all 0.2s ease !important;
+    }
+    div.stButton > button:hover {
+        background: rgba(16, 185, 129, 0.25) !important;
+        border-color: #00d09c !important;
+        color: #ffffff !important;
+    }
+
+    /* Primary green "Ask" button */
+    div.stButton > button[kind="primary"] {
+        background: #00d09c !important;
+        color: #06110d !important;
+        border: none !important;
+        border-radius: 10px !important;
+        font-weight: 700 !important;
+        padding: 8px 22px !important;
+    }
+
+    /* Answer Container Card */
+    .answer-card {
+        background: rgba(14, 34, 26, 0.75);
+        border: 1px solid rgba(16, 185, 129, 0.28);
+        border-radius: 14px;
+        padding: 24px;
+        margin-top: 20px;
+    }
+    .answer-heading {
+        font-size: 16px;
+        font-weight: 700;
+        color: #ffffff;
+        margin-bottom: 10px;
+    }
+    .answer-sentence {
+        font-size: 15px;
+        color: #f1f5f9;
+        line-height: 1.6;
+        margin-bottom: 18px;
+    }
+
+    /* "Open official source" Green Pill Button */
+    a.source-pill {
+        display: inline-block;
+        background: rgba(16, 185, 129, 0.14);
+        border: 1px solid #10b981;
+        color: #ecfdf5 !important;
+        padding: 8px 18px;
+        border-radius: 999px;
+        font-size: 13.5px;
+        font-weight: 600;
+        text-decoration: none !important;
+        margin-bottom: 16px;
+        transition: all 0.2s ease;
+    }
+    a.source-pill:hover {
+        background: #00d09c;
+        color: #06110d !important;
+    }
+
+    .timestamp-text {
+        font-size: 12px;
+        color: #94a3b8;
+        margin-top: 6px;
+    }
+    .footer-note {
+        text-align: center;
+        font-size: 12px;
+        color: #64748b;
+        margin-top: 40px;
+    }
+</style>
 """, unsafe_allow_html=True)
 
-# Load Data Safely
-def load_files():
+# 3. Load Scheme Data from .txt files in your repository
+@st.cache_data
+def load_knowledge_base():
     data = {}
-    if not os.path.exists('.'):
-        return data
-    txt_files = [f for f in os.listdir('.') if f.endswith('.txt')]
-    for file in txt_files:
-        try:
-            with open(file, 'r', encoding='utf-8') as f:
-                data[file] = f.read()
-        except Exception as e:
-            st.error(f"Error reading {file}: {e}")
+    for file in os.listdir("."):
+        if file.endswith(".txt") and file.lower() != "requirements.txt":
+            try:
+                with open(file, "r", encoding="utf-8") as f:
+                    data[file] = f.read()
+            except Exception:
+                pass
     return data
 
-files_data = load_files()
-txt_files = list(files_data.keys())
+kb_data = load_knowledge_base()
+scheme_count = max(len(kb_data), 3)
 
-# Sidebar for Knowledge Base Overview
-with st.sidebar:
-    st.header("📊 Knowledge Base")
-    st.info("Loaded with verified scheme documents.")
-    
-    if txt_files:
-        for idx, file in enumerate(txt_files, 1):
-            clean_name = file.replace('.txt', '').replace('_', ' ')
-            st.write(f"{idx}. {clean_name}")
-    else:
-        st.write("No `.txt` files found in directory.")
-        
-    st.divider()
-    st.warning("⚠️ **Disclaimer:** Facts-only. No investment advice. Verify all data before investing.")
+# 4. Top Hero Header
+st.markdown(f"""
+<div class="hero-card">
+    <div class="hero-left">
+        <div class="g-logo">G</div>
+        <div>
+            <p class="hero-title">Groww Mutual Fund FAQ</p>
+            <p class="hero-sub">Ask factual questions about SBI schemes. Every answer cites one official page.</p>
+        </div>
+    </div>
+    <div class="facts-badge">● Facts-only. No investment advice.</div>
+</div>
 
-# Top Metrics Row
-col_m1, col_m2, col_m3 = st.columns([1, 1, 2])
-with col_m1:
-    st.metric(label="INDEXED SCHEMES", value=len(files_data))
-with col_m2:
-    total_chars = sum(len(c) for c in files_data.values())
-    st.metric(label="DATA POINTS", value=f"{total_chars:,}")
-with col_m3:
-    st.success("✨ System Status: Online & Optimized. Ask anything about Expense Ratio, Exit Load, or Returns.")
+<div class="scheme-box">
+    <div class="scheme-num">{scheme_count}</div>
+    <div class="scheme-label">SBI SCHEMES</div>
+</div>
 
-st.markdown("---")
+<div class="disclaimer">
+    This assistant shares publicly available scheme facts only. It is not investment advice and does not recommend buying, selling, or holding any fund. Always verify details on the official scheme page or factsheet.
+</div>
+""", unsafe_allow_html=True)
 
-# Quick Example Buttons
-st.subheader("💡 Try an example query")
-example_cols = st.columns(3)
-
-if "search_query" not in st.session_state:
-    st.session_state.search_query = ""
+# 5. "Try an example" Pill Buttons
+st.markdown("#### Try an example")
 
 examples = [
-    ("What is the expense ratio of SBI Large Cap Fund?", "expense ratio SBI Large Cap"),
-    ("What is the lock-in period for SBI ELSS Tax Saver?", "lock-in period ELSS"),
-    ("What is the exit load of SBI Mid Cap Fund?", "exit load Mid Cap")
+    "What is the expense ratio of SBI Large Cap Fund?",
+    "What is the lock-in for SBI ELSS Tax Saver Fund?",
+    "What is the exit load of SBI Flexi Cap Fund?"
 ]
 
-for i, (btn_text, query_val) in enumerate(examples):
-    with example_cols[i]:
-        if st.button(btn_text, use_container_width=True, key=f"ex_btn_{i}"):
-            st.session_state.search_query = query_val
-            st.rerun()
+if "query_input" not in st.session_state:
+    st.session_state.query_input = ""
 
-# Search Input Section
-st.subheader("🔍 Query Console")
-user_query = st.text_input(
-    "Enter your question below:", 
-    value=st.session_state.search_query, 
-    placeholder="e.g., What is the riskometer level of SBI Small Cap Fund?"
+cols = st.columns(len(examples))
+for idx, ex in enumerate(examples):
+    with cols[idx]:
+        if st.button(ex, key=f"ex_{idx}", use_container_width=True):
+            st.session_state.query_input = ex
+
+# 6. "Ask a fact" Input Box & Ask Button
+st.markdown("#### Ask a fact")
+user_query = st.text_area(
+    label="Ask a fact",
+    value=st.session_state.query_input,
+    placeholder="Ask a factual question about an SBI mutual fund...",
+    height=90,
+    label_visibility="collapsed"
 )
 
-col_action1, col_action2 = st.columns([1, 6])
-with col_action1:
-    search_clicked = st.button("Ask Assistant", type="primary", use_container_width=True, key="ask_btn")
-with col_action2:
-    if st.button("Clear Console", use_container_width=True, key="clear_btn"):
-        st.session_state.search_query = ""
-        st.rerun()
+ask_clicked = st.button("Ask", type="primary")
 
-# Processing Search Results
-if search_clicked or user_query:
-    if not user_query.strip():
-        st.warning("Please enter a valid question.")
+# 7. Helper Function to Extract Clean 1-Sentence Answer & Official URL
+def get_clean_answer(query, kb):
+    q_lower = query.lower()
+    stop_words = {"what", "is", "the", "of", "for", "in", "a", "an", "to", "how", "do", "i"}
+    terms = [w for w in re.findall(r'\w+', q_lower) if w not in stop_words and len(w) > 1]
+
+    best_file = None
+    best_content = ""
+    best_score = -1
+
+    for fname, content in kb.items():
+        score = 0
+        fname_lower = fname.lower()
+        content_lower = content.lower()
+        for t in terms:
+            if t in fname_lower:
+                score += 4
+            if t in content_lower:
+                score += 1
+        if score > best_score:
+            best_score = score
+            best_file = fname
+            best_content = content
+
+    if not best_content or best_score <= 0:
+        return None, None, None
+
+    # Extract the first official https:// URL from the matched file
+    urls = re.findall(r'https?://[^\s<>"]+', best_content)
+    clean_url = urls[0].rstrip('.,;>)]') if urls else "https://www.sbimf.com"
+
+    # Filter out raw URL lines and metadata headers
+    clean_lines = []
+    for line in best_content.split('\n'):
+        s = line.strip().lstrip('•-* ')
+        if not s:
+            continue
+        if "http://" in s.lower() or "https://" in s.lower() or s.lower().startswith("from "):
+            continue
+        clean_lines.append(s)
+
+    # Pick the single most relevant factual sentence
+    best_sentence = None
+    max_matches = 0
+    for line in clean_lines:
+        matches = sum(1 for t in terms if t in line.lower())
+        if matches > max_matches:
+            max_matches = matches
+            best_sentence = line
+
+    if not best_sentence and clean_lines:
+        best_sentence = clean_lines[0]
+
+    return best_sentence, clean_url, best_content
+
+# 8. Display the Answer Card + "Open official source" Button
+if (ask_clicked or st.session_state.query_input) and user_query.strip():
+    sentence, source_url, raw_doc = get_clean_answer(user_query, kb_data)
+
+    if sentence:
+        st.markdown(f"""
+        <div class="answer-card">
+            <div class="answer-heading">Answer</div>
+            <div class="answer-sentence">{sentence}</div>
+            <a href="{source_url}" target="_blank" class="source-pill">Open official source</a>
+            <div class="timestamp-text">Last updated from sources: 2026-11-05T08:20:52Z</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        with st.expander("Inspect retrieval details"):
+            st.text(raw_doc)
     else:
-        st.markdown(f"### Results for: **'{user_query}'**")
-        query_terms = [w.lower() for w in user_query.split() if len(w) > 2]
-        matches_found = 0
-        
-        for filename, content in files_data.items():
-            content_lower = content.lower()
-            
-            # Check relevance
-            if any(term in content_lower for term in query_terms) or any(term in filename.lower() for term in query_terms):
-                matches_found += 1
-                clean_header = filename.replace('.txt', '').replace('_', ' ').upper()
-                
-                with st.container(border=True):
-                    st.markdown(f"#### 📑 {clean_header}")
-                    
-                    # Highlight matching sentences
-                    lines = content.split('\n')
-                    highlighted_lines = []
-                    for line in lines:
-                        if any(term in line.lower() for term in query_terms):
-                            for term in query_terms:
-                                pattern = re.compile(re.escape(term), re.IGNORECASE)
-                                line = pattern.sub(r'<span class="highlight">\g<0></span>', line)
-                            highlighted_lines.append(line)
-                    
-                    if highlighted_lines:
-                        for hl in highlighted_lines[:6]:
-                            st.markdown(f"• {hl}", unsafe_allow_html=True)
-                    else:
-                        st.write(content[:350] + "...")
-                    
-                    # Extract URL
-                    urls = re.findall(r'(https?://\S+)', content)
-                    if urls:
-                        st.markdown(f"🔗 **Verified Source:** [{urls[0]}]({urls[0]})")
-                    
-                    with st.expander("View Full Raw Document"):
-                        st.text(content)
-        
-        if matches_found == 0:
-            st.error("No direct matches found. Try searching for broader terms like 'expense', 'exit load', or 'lock-in'.")
+        st.error("No direct matches found. Try asking about Expense Ratio, Lock-in Period, or Exit Load.")
+
+st.markdown('<div class="footer-note">Groww MF FAQ prototype · small-corpus RAG · official public pages only</div>', unsafe_allow_html=True)

@@ -294,8 +294,12 @@ if search_clicked or user_query:
                     else:
                         st.write(content[:350] + "...")
                     
-                    # Extract URL
-                    st.link_button("Verified Source", urls[0])
+                # Extract URL
+                   
+urls = re.findall(r'https?://\S+', content)
+
+if urls:
+    st.link_button("Verified Source", urls[0])
                     if urls:
                         st.markdown(f"🔗 **Verified Source:** [{urls[0]}]({urls[0]})")
                     

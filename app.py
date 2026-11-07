@@ -11,7 +11,7 @@ def apply_custom_styles():
         <style>
         /* Main background */
         .stApp {
-            background-color: #F8F9FA;
+            background-color: #212529;
         }
         /* Custom Header Banner */
         .header-banner {

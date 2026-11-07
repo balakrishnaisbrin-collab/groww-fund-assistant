@@ -295,7 +295,7 @@ if search_clicked or user_query:
                         st.write(content[:350] + "...")
                     
                     # Extract URL
-                    st.link.button("Verified Source", urls\[O ])
+                    st.markdown(f'&lt;a href="{urls[0]}"&gt;Verified Source&lt;/a&gt;', unsafe_allow_html=True)
                     if urls:
                         st.markdown(f"🔗 **Verified Source:** [{urls[0]}]({urls[0]})")
                     
